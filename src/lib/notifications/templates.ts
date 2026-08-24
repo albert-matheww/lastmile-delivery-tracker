@@ -27,7 +27,8 @@ export function statusEmail(
   if (status === "RESCHEDULED" && extra?.rescheduleDate) {
     lines.push(`New delivery date: ${extra.rescheduleDate.toDateString()}.`);
   }
-  lines.push("", "Track your order any time from the Last-Mile Delivery Tracker dashboard.");
+  const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
+  lines.push("", `Track your order any time: ${baseUrl}/dashboard`);
 
   return { subject, body: lines.join("\n") };
 }
