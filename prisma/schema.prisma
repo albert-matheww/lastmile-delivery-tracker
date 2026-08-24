@@ -1,0 +1,230 @@
+// Last-Mile Delivery Tracker — data model
+// See /docs/DESIGN.md for the rate-calculation and assignment design rationale.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  AGENT
+  ADMIN
+}
+
+enum OrderType {
+  B2B
+  B2C
+}
+
+enum PaymentType {
+  PREPAID
+  COD
+}
+
+// Whether a rate applies to a delivery that stays inside one zone (INTRA)
+// or crosses between two different zones (INTER). Admin configures one
+// rate per (orderType, zoneRelation) pair — see RateCard below.
+enum ZoneRelation {
+  INTRA
+  INTER
+}
+
+enum AgentAvailability {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+// Order lifecycle. Valid forward transitions are enforced in
+// src/lib/orders/status-machine.ts; ADMIN can override to any status.
+enum OrderStatus {
+  CREATED
+  ASSIGNED
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+  RESCHEDULED
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+}
+
+enum NotificationStatus {
+  SENT
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  phone        String?
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  agentProfile        Agent?
+  ordersAsCustomer     Order[]              @relation("OrderCustomer")
+  ordersCreatedByAdmin Order[]              @relation("OrderCreatedByAdmin")
+  statusChangesActed   OrderStatusHistory[] @relation("StatusActor")
+
+  @@index([role])
+}
+
+model Zone {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  code      String   @unique
+  createdAt DateTime @default(now())
+
+  areas          Area[]
+  pickupOrders   Order[] @relation("PickupZone")
+  dropOrders     Order[] @relation("DropZone")
+  agents         Agent[]
+}
+
+// Admin-managed pincode/area → zone mapping. This is how zone detection
+// works: no geocoding, just a lookup table admins maintain.
+model Area {
+  id        String   @id @default(cuid())
+  pincode   String   @unique
+  label     String
+  zoneId    String
+  zone      Zone     @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+
+  @@index([zoneId])
+}
+
+// One rate per (orderType, zoneRelation). Kept flat rather than a full
+// zone×zone matrix because the spec only calls for intra/inter-zone
+// rates split by B2B/B2C — see design doc for the tradeoff.
+model RateCard {
+  id           String       @id @default(cuid())
+  orderType    OrderType
+  zoneRelation ZoneRelation
+  baseFee      Decimal      @db.Decimal(10, 2)
+  perKgRate    Decimal      @db.Decimal(10, 2)
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([orderType, zoneRelation])
+}
+
+model CodSurchargeConfig {
+  id              String    @id @default(cuid())
+  orderType       OrderType @unique
+  flatFee         Decimal   @db.Decimal(10, 2)
+  percentOfCharge Decimal   @db.Decimal(5, 4) @default(0) // e.g. 0.02 = 2%
+  updatedAt       DateTime  @updatedAt
+}
+
+model Agent {
+  id           String            @id @default(cuid())
+  userId       String            @unique
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  zoneId       String
+  zone         Zone              @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  availability AgentAvailability @default(AVAILABLE)
+  createdAt    DateTime          @default(now())
+
+  assignedOrders Order[] @relation("AssignedAgent")
+
+  @@index([zoneId, availability])
+}
+
+model Order {
+  id          String @id @default(cuid())
+  orderNumber String @unique
+
+  customerId       String
+  customer         User    @relation("OrderCustomer", fields: [customerId], references: [id])
+  createdByAdminId String?
+  createdByAdmin   User?   @relation("OrderCreatedByAdmin", fields: [createdByAdminId], references: [id])
+
+  pickupAddress String
+  pickupPincode String
+  pickupZoneId  String
+  pickupZone    Zone   @relation("PickupZone", fields: [pickupZoneId], references: [id])
+
+  dropAddress String
+  dropPincode String
+  dropZoneId  String
+  dropZone    Zone   @relation("DropZone", fields: [dropZoneId], references: [id])
+
+  lengthCm         Decimal @db.Decimal(8, 2)
+  breadthCm        Decimal @db.Decimal(8, 2)
+  heightCm         Decimal @db.Decimal(8, 2)
+  actualWeightKg   Decimal @db.Decimal(8, 3)
+  volumetricWeightKg Decimal @db.Decimal(8, 3)
+  chargeableWeightKg Decimal @db.Decimal(8, 3)
+
+  orderType   OrderType
+  paymentType PaymentType
+
+  zoneRelation ZoneRelation
+  baseFee      Decimal      @db.Decimal(10, 2)
+  weightCharge Decimal      @db.Decimal(10, 2)
+  codSurcharge Decimal      @db.Decimal(10, 2) @default(0)
+  totalCharge  Decimal      @db.Decimal(10, 2)
+
+  currentStatus OrderStatus @default(CREATED)
+
+  assignedAgentId String?
+  assignedAgent   Agent?  @relation("AssignedAgent", fields: [assignedAgentId], references: [id])
+
+  rescheduleDate   DateTime?
+  lastFailureNote  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  statusHistory  OrderStatusHistory[]
+  notifications  NotificationLog[]
+
+  @@index([customerId])
+  @@index([assignedAgentId])
+  @@index([currentStatus])
+  @@index([pickupZoneId])
+  @@index([dropZoneId])
+}
+
+// Insert-only audit trail. Never updated or deleted — the order's
+// currentStatus field is the denormalized "latest" pointer.
+model OrderStatusHistory {
+  id       String      @id @default(cuid())
+  orderId  String
+  order    Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status   OrderStatus
+  actorId  String
+  actor    User        @relation("StatusActor", fields: [actorId], references: [id])
+  actorRole Role
+  note     String?
+  createdAt DateTime   @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+model NotificationLog {
+  id        String              @id @default(cuid())
+  orderId   String
+  order     Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  channel   NotificationChannel
+  recipient String
+  subject   String?
+  body      String
+  status    NotificationStatus
+  error     String?
+  createdAt DateTime            @default(now())
+
+  @@index([orderId])
+}
