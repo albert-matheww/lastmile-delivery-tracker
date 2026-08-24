@@ -37,14 +37,14 @@ export default async function AdminAgentsPage() {
         ) : (
           <AgentForm zones={zoneOptions} />
         )}
-        <div className="overflow-x-auto rounded-md border border-border">
+        <div className="overflow-x-auto rounded-[5px] border-[1.5px] border-line bg-paper-raised">
           <table className="w-full text-sm">
-            <thead className="border-b border-border bg-background text-left text-xs uppercase tracking-wide text-muted">
+            <thead className="border-b-[1.5px] border-line bg-paper text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
               <tr>
-                <th className="px-4 py-2 font-medium">Agent</th>
-                <th className="px-4 py-2 font-medium">Zone</th>
-                <th className="px-4 py-2 font-medium">Availability</th>
-                <th className="px-4 py-2 font-medium">Active orders</th>
+                <th className="px-4 py-2.5">Agent</th>
+                <th className="px-4 py-2.5">Zone</th>
+                <th className="px-4 py-2.5">Availability</th>
+                <th className="px-4 py-2.5">Active orders</th>
               </tr>
             </thead>
             <tbody>

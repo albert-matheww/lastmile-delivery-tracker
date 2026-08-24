@@ -113,7 +113,7 @@ export default function NewOrderPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="mb-6 text-xl font-semibold">New Order</h1>
+      <h1 className="mb-6 font-display text-xl font-bold text-ink">New Order</h1>
 
       <div className="grid gap-6">
         <Card>
@@ -133,6 +133,7 @@ export default function NewOrderPage() {
               <Label>Pickup pincode</Label>
               <Input
                 required
+                mono
                 value={form.pickupPincode}
                 onChange={(e) => update("pickupPincode", e.target.value)}
                 placeholder="e.g. 560001"
@@ -150,6 +151,7 @@ export default function NewOrderPage() {
               <Label>Drop pincode</Label>
               <Input
                 required
+                mono
                 value={form.dropPincode}
                 onChange={(e) => update("dropPincode", e.target.value)}
                 placeholder="e.g. 560034"
@@ -168,6 +170,7 @@ export default function NewOrderPage() {
               <Label>Length</Label>
               <Input
                 required
+                mono
                 type="number"
                 min="0"
                 step="0.1"
@@ -179,6 +182,7 @@ export default function NewOrderPage() {
               <Label>Breadth</Label>
               <Input
                 required
+                mono
                 type="number"
                 min="0"
                 step="0.1"
@@ -190,6 +194,7 @@ export default function NewOrderPage() {
               <Label>Height</Label>
               <Input
                 required
+                mono
                 type="number"
                 min="0"
                 step="0.1"
@@ -201,6 +206,7 @@ export default function NewOrderPage() {
               <Label>Actual weight</Label>
               <Input
                 required
+                mono
                 type="number"
                 min="0"
                 step="0.01"
@@ -239,29 +245,33 @@ export default function NewOrderPage() {
           </Button>
         ) : (
           <Card>
-            <CardHeader>
-              <CardTitle>Charge Breakdown</CardTitle>
-              <CardDescription>
-                {quote.zoneRelation === "INTRA" ? "Intra-zone" : "Inter-zone"} delivery ·
-                chargeable weight {quote.chargeableWeightKg.toFixed(2)}kg (volumetric{" "}
-                {quote.volumetricWeightKg.toFixed(2)}kg)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-1 text-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4">
+              <div>
+                <CardTitle>Charge Breakdown</CardTitle>
+                <CardDescription>
+                  Chargeable weight {quote.chargeableWeightKg.toFixed(2)}kg (volumetric{" "}
+                  {quote.volumetricWeightKg.toFixed(2)}kg)
+                </CardDescription>
+              </div>
+              <span className="ink-stamp text-route bg-route-soft">
+                {quote.zoneRelation === "INTRA" ? "Intra-zone" : "Inter-zone"}
+              </span>
+            </div>
+            <CardContent className="font-manifest space-y-1 pt-4 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted">Base fee</span>
+                <span className="font-body text-ink-soft">Base fee</span>
                 <span>{formatCurrency(quote.baseFee)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted">Weight charge</span>
+                <span className="font-body text-ink-soft">Weight charge</span>
                 <span>{formatCurrency(quote.weightCharge)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted">COD surcharge</span>
+                <span className="font-body text-ink-soft">COD surcharge</span>
                 <span>{formatCurrency(quote.codSurcharge)}</span>
               </div>
               <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-semibold">
-                <span>Total</span>
+                <span className="font-body text-ink">Total</span>
                 <span>{formatCurrency(quote.totalCharge)}</span>
               </div>
               <Button size="lg" className="mt-4 w-full" onClick={placeOrder} disabled={placing}>

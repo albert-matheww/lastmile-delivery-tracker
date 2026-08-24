@@ -1,45 +1,169 @@
 @import "tailwindcss";
 
+/*
+  Design language: "manifest & stamp" — this is a shipping/logistics ops
+  tool, so the visual system borrows from waybills, customs stamps, and
+  parcel tags rather than generic SaaS dashboard chrome. See the ink
+  stamp (StatusStamp) and perforated ticket-stub card as the recurring
+  signature devices.
+*/
+
 :root {
-  --background: #f6f7f9;
-  --surface: #ffffff;
-  --foreground: #14181f;
-  --muted: #667085;
-  --border: #e3e6ea;
-  --primary: #2b5fe0;
-  --primary-foreground: #ffffff;
-  --success: #1a8a4a;
-  --success-bg: #e7f6ed;
-  --warning: #b5720a;
-  --warning-bg: #fdf3e0;
-  --danger: #c1332d;
-  --danger-bg: #fbeaea;
-  --info: #2b5fe0;
-  --info-bg: #eaf0fd;
+  --paper: #f3f1ea;
+  --paper-raised: #fffdf8;
+  --ink: #1f2421;
+  --ink-soft: #5b6560;
+  --line: #d9d4c6;
+  --line-strong: #b7b09c;
+
+  --route: #1b3a5c;
+  --route-soft: #e7edf2;
+  --manifest: #b23a2e;
+  --manifest-soft: #f7e6e3;
+  --cleared: #2f6b4f;
+  --cleared-soft: #e5efe8;
+  --hold: #c97d1f;
+  --hold-soft: #f8ecda;
+
+  --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
+  --font-body: "Inter", ui-sans-serif, sans-serif;
+  --font-mono-manifest: "IBM Plex Mono", ui-monospace, monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-border: var(--border);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-success: var(--success);
-  --color-success-bg: var(--success-bg);
-  --color-warning: var(--warning);
-  --color-warning-bg: var(--warning-bg);
-  --color-danger: var(--danger);
-  --color-danger-bg: var(--danger-bg);
-  --color-info: var(--info);
-  --color-info-bg: var(--info-bg);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-route: var(--route);
+  --color-route-soft: var(--route-soft);
+  --color-manifest: var(--manifest);
+  --color-manifest-soft: var(--manifest-soft);
+  --color-cleared: var(--cleared);
+  --color-cleared-soft: var(--cleared-soft);
+  --color-hold: var(--hold);
+  --color-hold-soft: var(--hold-soft);
+
+  /* aliases used by existing components — mapped onto the manifest palette */
+  --color-background: var(--paper);
+  --color-surface: var(--paper-raised);
+  --color-foreground: var(--ink);
+  --color-muted: var(--ink-soft);
+  --color-border: var(--line);
+  --color-primary: var(--route);
+  --color-primary-foreground: #ffffff;
+  --color-success: var(--cleared);
+  --color-success-bg: var(--cleared-soft);
+  --color-warning: var(--hold);
+  --color-warning-bg: var(--hold-soft);
+  --color-danger: var(--manifest);
+  --color-danger-bg: var(--manifest-soft);
+  --color-info: var(--route);
+  --color-info-bg: var(--route-soft);
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono-manifest);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, sans-serif;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(31, 36, 33, 0.05) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+.font-display {
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+}
+
+.font-manifest {
+  font-family: var(--font-mono-manifest), ui-monospace, monospace;
+}
+
+/* Ink stamp — the recurring signature element for order status. A
+   rotated, double-ruled rubber-stamp mark instead of a soft pill badge. */
+.ink-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  font-weight: 700;
+  font-size: 0.6875rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.6rem;
+  border: 1.5px solid currentColor;
+  outline: 1.5px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 3px;
+  transform: rotate(-2deg);
+  animation: stamp-in 240ms cubic-bezier(0.2, 1.4, 0.6, 1);
+  white-space: nowrap;
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-2deg) scale(1.5);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-2deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-stamp {
+    animation: none;
+  }
+}
+
+/* Perforated stub edge for order/ticket cards — a torn-receipt divider
+   between the tracking-number stub and the main card body. */
+.stub-divider {
+  position: relative;
+  border: none;
+  border-top: 1.5px dashed var(--line-strong);
+}
+.stub-divider::before,
+.stub-divider::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+}
+.stub-divider::before {
+  left: -8px;
+}
+.stub-divider::after {
+  right: -8px;
+}
+
+/* Timeline connector draw-in, used by the tracking timeline. */
+@keyframes draw-down {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.timeline-line {
+  transform-origin: top;
+  animation: draw-down 500ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .timeline-line {
+    animation: none;
+  }
 }

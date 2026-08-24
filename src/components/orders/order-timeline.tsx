@@ -15,21 +15,30 @@ export function OrderTimeline({ history }: { history: OrderWithDetail["statusHis
             <li key={entry.id} className="flex gap-3">
               <div className="flex flex-col items-center">
                 <span
-                  className={`h-2.5 w-2.5 rounded-full ${
-                    i === history.length - 1 ? "bg-primary" : "bg-border"
+                  className={`h-2.5 w-2.5 shrink-0 rounded-full border-[1.5px] ${
+                    i === history.length - 1
+                      ? "border-route bg-route"
+                      : "border-line-strong bg-paper-raised"
                   }`}
                 />
-                {i < history.length - 1 && <span className="w-px flex-1 bg-border" />}
+                {i < history.length - 1 && (
+                  <span
+                    className="timeline-line w-px flex-1 bg-line-strong"
+                    style={{ animationDelay: `${i * 90}ms` }}
+                  />
+                )}
               </div>
               <div className="pb-4">
                 <div className="flex items-center gap-2">
                   <StatusBadge status={entry.status} />
-                  <span className="text-xs text-muted">{formatDateTime(entry.createdAt)}</span>
+                  <span className="font-manifest text-xs text-ink-soft">
+                    {formatDateTime(entry.createdAt)}
+                  </span>
                 </div>
-                <p className="mt-1 text-sm text-muted">
+                <p className="mt-1 text-sm text-ink-soft">
                   by {entry.actor.name} ({entry.actorRole})
                 </p>
-                {entry.note && <p className="mt-1 text-sm">{entry.note}</p>}
+                {entry.note && <p className="mt-1 text-sm text-ink">{entry.note}</p>}
               </div>
             </li>
           ))}

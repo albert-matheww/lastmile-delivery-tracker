@@ -23,9 +23,9 @@ export default async function AdminRateCardsPage() {
             One rate per order type × zone relation. Submitting an existing pair updates it.
           </p>
           <RateCardForm />
-          <div className="overflow-x-auto rounded-md border border-border">
+          <div className="overflow-x-auto rounded-[5px] border-[1.5px] border-line bg-paper-raised">
             <table className="w-full text-sm">
-              <thead className="border-b border-border bg-background text-left text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b-[1.5px] border-line bg-paper text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
                 <tr>
                   <th className="px-4 py-2 font-medium">Order type</th>
                   <th className="px-4 py-2 font-medium">Zone relation</th>
@@ -35,11 +35,11 @@ export default async function AdminRateCardsPage() {
               </thead>
               <tbody>
                 {rateCards.map((rc) => (
-                  <tr key={rc.id} className="border-b border-border last:border-0">
+                  <tr key={rc.id} className="border-b border-line last:border-0">
                     <td className="px-4 py-2">{rc.orderType}</td>
                     <td className="px-4 py-2">{rc.zoneRelation}</td>
-                    <td className="px-4 py-2">{formatCurrency(rc.baseFee.toString())}</td>
-                    <td className="px-4 py-2">{formatCurrency(rc.perKgRate.toString())}/kg</td>
+                    <td className="px-4 py-2 font-manifest">{formatCurrency(rc.baseFee.toString())}</td>
+                    <td className="px-4 py-2 font-manifest">{formatCurrency(rc.perKgRate.toString())}/kg</td>
                   </tr>
                 ))}
               </tbody>
@@ -54,9 +54,9 @@ export default async function AdminRateCardsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <CodSurchargeForm />
-          <div className="overflow-x-auto rounded-md border border-border">
+          <div className="overflow-x-auto rounded-[5px] border-[1.5px] border-line bg-paper-raised">
             <table className="w-full text-sm">
-              <thead className="border-b border-border bg-background text-left text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b-[1.5px] border-line bg-paper text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft">
                 <tr>
                   <th className="px-4 py-2 font-medium">Order type</th>
                   <th className="px-4 py-2 font-medium">Flat fee</th>
@@ -65,10 +65,10 @@ export default async function AdminRateCardsPage() {
               </thead>
               <tbody>
                 {codConfigs.map((c) => (
-                  <tr key={c.id} className="border-b border-border last:border-0">
+                  <tr key={c.id} className="border-b border-line last:border-0">
                     <td className="px-4 py-2">{c.orderType}</td>
-                    <td className="px-4 py-2">{formatCurrency(c.flatFee.toString())}</td>
-                    <td className="px-4 py-2">{(Number(c.percentOfCharge) * 100).toFixed(1)}%</td>
+                    <td className="px-4 py-2 font-manifest">{formatCurrency(c.flatFee.toString())}</td>
+                    <td className="px-4 py-2 font-manifest">{(Number(c.percentOfCharge) * 100).toFixed(1)}%</td>
                   </tr>
                 ))}
               </tbody>

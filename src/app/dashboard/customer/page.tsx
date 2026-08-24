@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
-import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { OrderTicketCard } from "@/components/orders/order-ticket-card";
 
 export default async function CustomerOrdersPage() {
   const user = await getCurrentUser();
@@ -21,8 +20,8 @@ export default async function CustomerOrdersPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold">My Orders</h1>
-          <p className="text-sm text-muted">{orders.length} order(s)</p>
+          <h1 className="font-display text-xl font-bold text-ink">My Orders</h1>
+          <p className="text-sm text-ink-soft">{orders.length} order(s)</p>
         </div>
         <Link href="/dashboard/customer/new">
           <Button>New Order</Button>
@@ -36,26 +35,18 @@ export default async function CustomerOrdersPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {orders.map((order) => (
-            <Link key={order.id} href={`/dashboard/customer/orders/${order.id}`}>
-              <Card className="transition-colors hover:border-primary/50">
-                <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
-                  <div>
-                    <p className="font-mono text-sm font-medium">{order.orderNumber}</p>
-                    <p className="text-sm text-muted">
-                      {order.pickupZone.name} → {order.dropZone.name} · {order.orderType} ·{" "}
-                      {order.paymentType}
-                    </p>
-                    <p className="text-xs text-muted">{formatDateTime(order.createdAt)}</p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="font-semibold">{formatCurrency(order.totalCharge.toString())}</span>
-                    <StatusBadge status={order.currentStatus} />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+            <OrderTicketCard
+              key={order.id}
+              href={`/dashboard/customer/orders/${order.id}`}
+              orderNumber={order.orderNumber}
+              routeLabel={`${order.pickupZone.name} → ${order.dropZone.name}`}
+              meta={`${order.orderType} · ${order.paymentType}`}
+              createdAt={order.createdAt}
+              totalCharge={order.totalCharge.toString()}
+              status={order.currentStatus}
+            />
           ))}
         </div>
       )}

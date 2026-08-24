@@ -39,8 +39,22 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center bg-paper px-4">
+      <div className="w-full max-w-sm">
+        <Link href="/" className="mb-6 flex items-center justify-center gap-2">
+          <span
+            aria-hidden
+            className="grid h-6 w-6 shrink-0 place-items-center rounded-[3px] border-[1.5px] border-ink text-[10px] font-bold"
+            style={{ transform: "rotate(-6deg)" }}
+          >
+            LM
+          </span>
+          <span className="font-display text-sm font-bold uppercase tracking-[0.14em] text-ink">
+            Last-Mile Tracker
+          </span>
+        </Link>
+
+      <Card>
         <CardHeader>
           <CardTitle>Create a customer account</CardTitle>
           <CardDescription>Book and track deliveries</CardDescription>
@@ -83,12 +97,13 @@ export default function RegisterPage() {
           </form>
           <p className="mt-4 text-center text-sm text-muted">
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-primary hover:underline">
+            <Link href="/login" className="font-medium text-route hover:underline">
               Sign in
             </Link>
           </p>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
